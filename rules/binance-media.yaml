@@ -1,0 +1,9 @@
+# Binance Square / APP 媒体与静态 CDN（优先流畅，可走港新日等）
+# 交易主域仍由 geosite:binance → 🟨 Binance（默认冷门）处理
+payload:
+  - '+.bnbstatic.com'
+  - '+.bscdnweb.com'
+  - '+.nftstatic.com'
+  - '+.bnappweb.black'
+  - '+.bmwweb.solutions'
+  - '+.bntrace.com'
