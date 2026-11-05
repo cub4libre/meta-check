@@ -1,0 +1,7 @@
+# TradingView 官网 / 图表 / Widget CDN
+payload:
+  - '+.tradingview.com'
+  - '+.tradingview-widget.com'
+  - '+.tvcontent.tradingview.com'
+  - '+.tvstatic.com'
+  - '+.tvc-chart.com'

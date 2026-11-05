@@ -1,0 +1,4 @@
+# SSH(22) / RDP(3389) — 须排在「非标端口」规则之前
+payload:
+  - DST-PORT,22
+  - DST-PORT,3389
