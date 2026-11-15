@@ -1,0 +1,142 @@
+# ==========================================================
+# Clash Meta 底座（DNS / TUN / 嗅探 / GEO）
+# 来源：对齐 usbog232/clashmetadingyue 的 base-meta.yaml
+# 用途：给 subconverter 作 clash_rule_base，补齐「仅有分流 ini」时缺失的 DNS 逻辑
+# 说明：不包含 proxies / proxy-groups / rules（那些由 new-meta.ini 生成）
+# ==========================================================
+
+mixed-port: 7890
+redir-port: 7892
+tproxy-port: 7893
+
+allow-lan: true
+bind-address: "*"
+mode: rule
+log-level: info
+ipv6: false
+udp: true
+
+unified-delay: true
+tcp-concurrent: true
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+# ==========================================================
+# DNS（国内优先解析 + 境外 fallback，适配 Fake-IP / DNS 代理 / respect-rules）
+# 这是「启用 DNS 代理后国内站仍可用」的关键：国内域名不要落到境外 DNS
+# ==========================================================
+dns:
+  enable: true
+  listen: 0.0.0.0:7874
+  ipv6: false
+  # 连上游 DNS 也走规则：国内 DNS IP → DIRECT；境外 DoH → 代理
+  respect-rules: true
+
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - '*.lan'
+    - '*.local'
+    - '*.localdomain'
+    - 'localhost'
+    - '+.lan'
+    - '+.local'
+    - 'time.*'
+    - 'ntp.*'
+    - 'time.windows.com'
+    - 'time.apple.com'
+    - 'time.cloudflare.com'
+    - 'router.asus.com'
+    - 'routerlogin.net'
+    - 'stun.*'
+    - 'stun.*.*'
+    - '+.stun.*'
+    - '+.stun.*.*'
+
+  # 解析 DoH 域名本身（必须是 IP / 直连可达）
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+
+  # 节点域名解析也走国内，避免连机场入口时 DNS 卡死
+  proxy-server-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+
+  # 主 nameserver：国内优先（启用 DNS 代理时国内站靠这个）
+  nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+    - 223.5.5.5
+    - 119.29.29.29
+
+  # 境外 / 污染兜底
+  fallback:
+    - https://dns.cloudflare.com/dns-query
+    - tls://1.1.1.1:853
+    - tls://8.8.8.8:853
+
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    geosite:
+      - gfw
+    ipcidr:
+      - 240.0.0.0/4
+
+  # 国内与私网域名强制国内 DNS（比只靠 fallback-filter 更稳）
+  nameserver-policy:
+    "geosite:private":
+      - 223.5.5.5
+      - 119.29.29.29
+    "geosite:cn,google-cn,apple,microsoft@cn,steam@cn":
+      - 223.5.5.5
+      - 119.29.29.29
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
+
+# ==========================================================
+# TUN（OpenClash 混合/增强模式常会覆盖；保留作完整底座）
+# ==========================================================
+tun:
+  enable: true
+  stack: system
+  auto-route: true
+  auto-detect-interface: true
+  strict-route: false
+  dns-hijack:
+    - any:53
+
+# ==========================================================
+# GEO（优先 jsDelivr testingcf，降低 GitHub TLS 下载失败）
+# ==========================================================
+geodata-mode: true
+geox-url:
+  geoip: "https://testingcf.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat"
+  geosite: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat"
+  mmdb: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb"
+
+# ==========================================================
+# 嗅探（DNS 代理关闭时尤其重要；开启时也有助于按域名分流）
+# ==========================================================
+sniffer:
+  enable: true
+  force-dns-mapping: true
+  parse-pure-ip: true
+  override-destination: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  skip-domain:
+    - 'Mijia Cloud'
+    - '+.push.apple.com'
+
+experimental:
+  sniff-tls-sni: true
+  sniff-http-host: true
