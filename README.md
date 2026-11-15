@@ -1,27 +1,35 @@
-# Clash Meta 订阅转换模板
+# meta-check
 
-自维护版 subconverter 配置，基于 [usbog232/clashmetadingyue](https://github.com/usbog232/clashmetadingyue) 的 `new-meta.ini`。
+自维护 Clash Meta 订阅转换模板（**29 策略组 + 8 节点组**）。
 
-## 相对原版的改动
+## 远程配置
 
-| 项 | 说明 |
+```text
+https://raw.githubusercontent.com/cub4libre/meta-check/main/new-meta.ini
+```
+
+内含 `clash_rule_base` → `base-meta.yaml`（国内 DNS / respect-rules / TUN / 嗅探）。
+
+## 节点组（8）
+
+| 组 | 作用 |
 |---|---|
-| `🧊 冷门节点` | 由 `select` 改为 `url-test`，自动测速选优（间隔 300s，容差 50ms） |
+| `🧭 手动选择` | `select` 全节点，**可固定到某一个节点** |
+| `♻️ 自动选择` | 全节点 url-test |
+| `🇭🇰 HK` `🇹🇼 TW` `🇯🇵 JP` `🇸🇬 SG` `🇺🇸 US` | 地区 url-test |
+| `🧊 冷门节点` | 非五区 url-test |
 
-## 使用
+各应用策略组都挂了 `🧭 手动选择`，需要钉死单节点时选它即可。
 
-在 subconverter / 订阅转换里把「远程配置」指到本仓库的 raw 地址，例如：
+## 策略组（29）
 
-```text
-https://raw.githubusercontent.com/<你的用户名>/<仓库名>/main/new-meta.ini
-```
+腾讯会议、国内应用、Apple、AI、Telegram、即时通讯、社交媒体、YouTube、Netflix、TikTok、Instagram、X、GitHub、测速工具、Steam、OKX、Binance、Bybit、加密货币、TradingView、Google、cloudflare、Microsoft、🚀手动选择、Default、漏网之鱼、SSH/RDP、非标端口、遵循规则。
 
-或 jsDelivr：
+## 上传 GitHub 时请包含
 
-```text
-https://cdn.jsdelivr.net/gh/<你的用户名>/<仓库名>@main/new-meta.ini
-```
-
-## 文件
-
-- `new-meta.ini` — 主模板（规则 + 策略组）
+- `new-meta.ini`
+- `base-meta.yaml`
+- `rules/cn-apps.yaml`（抖音/快手/小红书，不依赖 GeoSite 的 douyin 条目）
+- `rules/ssh-rdp-ports.yaml`
+- `rules/tencent-meeting.yaml`
+- `rules/tradingview.yaml`
